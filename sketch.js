@@ -1,3 +1,12 @@
+var Clasificando = false;
+var Camara;
+var RelacionCamara;
+var CartaMensaje;
+var Clasificando = false;
+var CargandoNeurona = false;
+var knn;
+var modelo;
+
 var Opciones = {
   host: "localhost",
   port: 9001,
@@ -5,7 +14,6 @@ var Opciones = {
   clientId: "Probando"
 };
 var client = mqtt.connect(Opciones);
-var clasificar = false;
 client.onConnectionLost = MQTTPerder;
 client.onMessageArrived = MQTTMensaje;
 
@@ -100,7 +108,8 @@ function PresionandoBoton() {
   var NombreBoton = this.elt.innerText;
   console.log("Entrenando con " + NombreBoton);
   EntrenarKnn(NombreBoton);
-}
+
+  }
 
 function EntrenarKnn(ObjetoEntrenar) {
   var Imagen = modelo.infer(Camara);
@@ -112,13 +121,9 @@ function clasificar() {
     var Imagen = modelo.infer(Camara);
     knn.classify(Imagen, function(error, result) {
       if (error) {
-        console.log("Error en clasificar");
+        console.log("Error en clasificar"+error);
         console.error();
       } else {
-        client.subscribe("clasifcando");
-        message = new Paho.MQTT.Message(result.label);
-        message.destinationName = "clasifcando";
-        client.send(message);
         var Etiqueta;
         var Confianza;
         if (!CargandoNeurona) {
@@ -137,6 +142,8 @@ function clasificar() {
           Confianza = Math.ceil(Valores[Indice] * 100);
         }
         CartaMensaje.innerText = Etiqueta + " - " + Confianza + "%";
+        client.publish('banda','CartaMensaje')
+        // mandar funcion de mqtt client.enviar
       }
     });
   }
