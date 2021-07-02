@@ -11,13 +11,14 @@ var Opciones = {
   host: "localhost",
   port: 9001,
   protocol: "ws",
-  clientId: "Probando"
+  clientId: "prueba"
 };
 var client = mqtt.connect(Opciones);
+
+/*
 client.onConnectionLost = MQTTPerder;
 client.onMessageArrived = MQTTMensaje;
-
-/*client.connect({
+client.connect({
   onSuccess:ConectadoMQTT,
   userName: UsuarioMQTT,
   password: ContrasenaMQTT
@@ -142,8 +143,24 @@ function clasificar() {
           Confianza = Math.ceil(Valores[Indice] * 100);
         }
         CartaMensaje.innerText = Etiqueta + " - " + Confianza + "%";
-        client.publish('banda','CartaMensaje')
+
         // mandar funcion de mqtt client.enviar
+
+        function EventoConectar() {
+          console.log("Conectado a MQTT");
+              client.publish("bandafrut", Etiqueta);
+                }
+
+        function EventoMensaje(topic, message) {
+          if (topic == "bandafru") {
+            console.log("La fruta es: " + message.toString());
+          }
+          console.log(topic + " - " + message.toString());
+        }
+
+        client.on("connect", EventoConectar);
+        client.on("message", EventoMensaje);
+
       }
     });
   }
