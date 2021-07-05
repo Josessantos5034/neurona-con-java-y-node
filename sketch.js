@@ -1,4 +1,3 @@
-var Clasificando = false;
 var Camara;
 var RelacionCamara;
 var CartaMensaje;
@@ -6,24 +5,20 @@ var Clasificando = false;
 var CargandoNeurona = false;
 var knn;
 var modelo;
+var mqtt;
+var reconnectTimeout = 2000;
+var host="localhost";
+var port=1884;
+var clientId = "ProyectoJS"
+var client = new Paho.MQTT.Client(host,port,clientId);
 
-var Opciones = {
-  host: "localhost",
-  port: 9001,
-  protocol: "ws",
-  clientId: "prueba"
-};
-var client = mqtt.connect(Opciones);
 
-/*
 client.onConnectionLost = MQTTPerder;
 client.onMessageArrived = MQTTMensaje;
+
 client.connect({
-  onSuccess:ConectadoMQTT,
-  userName: UsuarioMQTT,
-  password: ContrasenaMQTT
+  onSuccess:ConectadoMQTT
 });
-*/
 
 function MQTTPerder(responseObject){
   if (responseObject.errorCode !== 0){
@@ -31,7 +26,7 @@ function MQTTPerder(responseObject){
   }
 }
 function MQTTMensaje(message){
-  console.log("Mesaje recibido: " + message.payloadString);
+  console.log("Mensaje recibido: " + message.payloadString);
 }
 
 function ConectadoMQTT() {
@@ -109,8 +104,7 @@ function PresionandoBoton() {
   var NombreBoton = this.elt.innerText;
   console.log("Entrenando con " + NombreBoton);
   EntrenarKnn(NombreBoton);
-
-  }
+}
 
 function EntrenarKnn(ObjetoEntrenar) {
   var Imagen = modelo.infer(Camara);
@@ -122,9 +116,13 @@ function clasificar() {
     var Imagen = modelo.infer(Camara);
     knn.classify(Imagen, function(error, result) {
       if (error) {
-        console.log("Error en clasificar"+error);
+        console.log("Error en clasificar"+ error);
         console.error();
       } else {
+        client.subscribe("banda/frutas");
+        message = new Paho.MQTT.Message(result.label);
+        message.destinationName = "banda/frutas";
+        client.send(message);
         var Etiqueta;
         var Confianza;
         if (!CargandoNeurona) {
@@ -143,24 +141,6 @@ function clasificar() {
           Confianza = Math.ceil(Valores[Indice] * 100);
         }
         CartaMensaje.innerText = Etiqueta + " - " + Confianza + "%";
-
-        // mandar funcion de mqtt client.enviar
-
-        function EventoConectar() {
-          console.log("Conectado a MQTT");
-              client.publish("bandafrut", Etiqueta);
-                }
-
-        function EventoMensaje(topic, message) {
-          if (topic == "bandafru") {
-            console.log("La fruta es: " + message.toString());
-          }
-          console.log(topic + " - " + message.toString());
-        }
-
-        client.on("connect", EventoConectar);
-        client.on("message", EventoMensaje);
-
       }
     });
   }
@@ -197,42 +177,3 @@ function CargarNeurona() {
     CargandoNeurona = true;
   });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*function EventoConectar() {
-  console.log("Conectado a MQTT");
-  client.subscribe("CASA/#", function(err) {
-    if (!err) {
-      client.publish("CASA/Temperatura", "30");
-    }
-  });
-}
-
-function EventoMensaje(topic, message) {
-  if (topic == "CASA/Temperatura") {
-    console.log("La Temperatura es " + message.toString());
-  }
-  console.log(topic + " valor de:  " + message.toString());
-  // client.end()
-}
-
-client.on("connect", EventoConectar);
-client.on("message", EventoMensaje);
-
-console.log("Empezando a conectar");
-*/
