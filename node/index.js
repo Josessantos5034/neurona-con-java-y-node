@@ -8,7 +8,7 @@ var Opciones = {
 };
 var client = mqtt.connect(Opciones);
 const SerialPort = require('serialport');
-const port = new SerialPort('COM11',{
+const port = new SerialPort('COM3',{
   baudRate: 9600
 });
 client.on('connect', function () {
