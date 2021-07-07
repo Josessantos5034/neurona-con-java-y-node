@@ -74,7 +74,7 @@ function draw() {
 
   if (knn.getNumLabels() > 0 && !Clasificando) {
     console.log("Empezar a clasificar");
-    setInterval(clasificar, 500);
+    setInterval(clasificar, 1000);
     Clasificando = true;
   }
 
