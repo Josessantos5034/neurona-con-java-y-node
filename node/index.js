@@ -19,14 +19,11 @@ client.on('connect', function () {
 
 client.on('message', function (topic, message) {
   let Mensaje = message.toString();
-  if (Mensaje == "Mandarina"){
-    console.log("Selecionado Mandarina");
-    port.write("M");
-  }else if (Mensaje == "Pera"){
-  console.log("Selecionado Pera");
-  port.write("P");
-}else if (Mensaje == "Uva"){
-  console.log("Selecionado Uva");
-  port.write("U");
-  }
+  if (Mensaje == "CAJA BUENA"){
+    console.log("Selecionado caja buena");
+    port.write("B");
+  }else if (Mensaje == "CAJA MALA"){
+  console.log("Selecionado caja mala");
+  port.write("M");
+}
 });
